@@ -1,9 +1,15 @@
 import express from "express";
 import rateLimit from "express-rate-limit";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 const app = express();
 const port = Number(process.env.PORT) || 3001;
 const host = process.env.HOST || "0.0.0.0";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const webDist = path.resolve(__dirname, "../web/dist");
 
 app.set("trust proxy", 1);
 
@@ -55,7 +61,7 @@ app.get("/events/:sessionID", eventsLimiter, (req, res) => {
   res.setHeader("Content-Type", "text/event-stream");
   res.setHeader("Cache-Control", "no-cache");
   res.setHeader("Connection", "keep-alive");
-  res?.flushHeaders?.();
+  res.flushHeaders?.();
 
   const isClientPresent = clients.has(sessionID);
   if (!isClientPresent) clients.set(sessionID, new Set());
@@ -109,6 +115,21 @@ app.post("/collect", collectLimiter, (req, res) => {
   res.json({ received: true });
 });
 
+// Servir Astro build
+app.use(express.static(webDist));
+
+app.get("/", (_req, res) => {
+  res.sendFile(path.join(webDist, "index.html"));
+});
+
+app.get("/attacks", (_req, res) => {
+  res.sendFile(path.join(webDist, "attacks", "index.html"));
+});
+
+app.get("/session", (_req, res) => {
+  res.sendFile(path.join(webDist, "session", "index.html"));
+});
+
 app.listen(port, host, () => {
-  console.log(`API running on http://${host}:${port}`);
+  console.log(`App running on http://${host}:${port}`);
 });
