@@ -1,0 +1,21 @@
+---
+type StatusVariant = "waiting" | "connected" | "attack" | "error";
+
+interface Props {
+	status: StatusVariant;
+	label?: string;
+}
+
+const { status, label } = Astro.props;
+
+const defaultLabels: Record<StatusVariant, string> = {
+	waiting: "Esperando",
+	connected: "Conectado",
+	attack: "Ataque detectado",
+	error: "Error",
+};
+---
+
+<span class:list={["status-badge", `status-${status}`]}>
+	{label ?? defaultLabels[status]}
+</span>

@@ -1,0 +1,52 @@
+---
+interface Props {
+	title?: string;
+	description: string;
+	primaryHref: string;
+	primaryLabel: string;
+	secondaryHref: string;
+	secondaryLabel: string;
+}
+
+const {
+	title,
+	description,
+	primaryHref,
+	primaryLabel,
+	secondaryHref,
+	secondaryLabel,
+} = Astro.props;
+---
+
+<section class="hero">
+	<div class="container hero-grid">
+		<div>
+			<p class="eyebrow">MONITOREO DE ATAQUES</p>
+			<h1>
+				<slot name="title">{title}</slot>
+			</h1>
+			<p class="hero-description">{description}</p>
+
+			<div class="button-row">
+				<a class="button button-primary" href={primaryHref}>{primaryLabel}</a>
+				<a class="button button-secondary" href={secondaryHref}>{secondaryLabel}</a>
+			</div>
+		</div>
+
+		<div class="hero-side">
+			<aside class="hero-panel" aria-label="Resumen del proyecto">
+				<h2 class="eyebrow">¿Qué es posible validar?</h2>
+				<ul>
+					<li>Si código no confiable se ejecutó en tu entorno.</li>
+					<li>Qué vector de ejecución se activó en un ataque.</li>
+					<li>Si tus precauciones de mitigación de riesgos son efectivas.</li>
+				</ul>
+			</aside>
+
+			<div class="hero-inline-links">
+				<a href="#como-funciona">¿Cómo funciona?</a>
+				<a href="#seguridad">Principios de Seguridad</a>
+			</div>
+		</div>
+	</div>
+</section>

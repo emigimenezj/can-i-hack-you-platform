@@ -1,0 +1,50 @@
+---
+import AttackCard from "../components/AttackCard.astro";
+import Section from "../components/Section.astro";
+import MainLayout from "../layouts/MainLayout.astro";
+
+const vectors = [
+	{
+		name: "Ejecución de scripts npm en preinstall, postinstall y prepare",
+		description:
+			"El ataque aprovecha los lifecycle scripts de npm para ejecutar comandos cuando se instala el proyecto. Si un repositorio define lógica maliciosa en preinstall, postinstall o prepare, esa lógica puede ejecutarse automáticamente durante npm install o pnpm install y enviar eventos o exfiltrar datos del entorno.",
+		mitigation:
+			"Revisá los scripts declarados en package.json y en dependencias críticas antes de instalar. Usá lockfile, ejecutá instalaciones en entornos aislados y deshabilitá scripts de instalación en repositorios no confiables durante la revisión inicial.",
+	},
+	{
+		name: "Ejecución automática a través de plugin de ESLint",
+		description:
+			"Este vector consiste en cargar un plugin de ESLint que ejecuta código cuando el linter analiza archivos. Como ESLint suele correr en tareas rutinarias de desarrollo, el script del plugin puede dispararse sin fricción en un flujo normal de trabajo.",
+		mitigation:
+			"Instalá únicamente plugins de ESLint auditados, fijá versiones y revisá su código fuente cuando sea posible. Ejecutá linting en entornos controlados al validar repositorios nuevos y desconfiá de configuraciones que referencien plugins desconocidos.",
+	},
+	{
+		name: "Ejecución automática mediante tarea de VSCode",
+		description:
+			"El ataque define una tarea en la carpeta .vscode para que VSCode la ejecute automáticamente al abrir el proyecto o al activarse un trigger de workspace. Esa tarea puede lanzar un script que reporte actividad al backend o ejecute comandos no esperados.",
+		mitigation:
+			"Inspeccioná los archivos en .vscode/tasks.json y otras configuraciones de workspace antes de confiar el proyecto. Desactivá ejecución automática de tareas en repositorios no auditados y abrí primero en modo restringido.",
+	},
+];
+---
+
+<MainLayout
+	title="Can I Hack You? | Ataques"
+	description="Catalogo educativo de vectores de ejecucion usados por la demo."
+>
+	<Section
+		eyebrow="Vectores de ataque"
+		title="Explicación y mitigación de los ataques soportados."
+		description="Esta pagina es un catalogo tecnico inicial de los vectores demostrados por el repositorio demo publico."
+	>
+		<span slot="title" class="title-neutral">Explicación y mitigación de los ataques soportados.</span>
+
+		<div class="attack-grid">
+			{
+				vectors.map((vector) => (
+					<AttackCard name={vector.name} description={vector.description} mitigation={vector.mitigation} />
+				))
+			}
+		</div>
+	</Section>
+</MainLayout>

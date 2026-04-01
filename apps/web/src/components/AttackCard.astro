@@ -1,0 +1,23 @@
+---
+interface Props {
+	name: string;
+	description: string;
+	mitigation: string;
+}
+
+const { name, description, mitigation } = Astro.props;
+---
+
+<article class="attack-card">
+	<h3>{name}</h3>
+	<dl>
+		<div>
+			<dt>Descripción</dt>
+			<dd>{description}</dd>
+		</div>
+		<div>
+			<dt>Mitigación</dt>
+			<dd>{mitigation}</dd>
+		</div>
+	</dl>
+</article>

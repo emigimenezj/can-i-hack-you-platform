@@ -1,0 +1,306 @@
+---
+import CodeBlock from "../components/CodeBlock.astro";
+import EventList from "../components/EventList.astro";
+import Section from "../components/Section.astro";
+import MainLayout from "../layouts/MainLayout.astro";
+import type { AttackEvent } from "../global-store";
+
+const apiURL = import.meta.env.PUBLIC_API_URL ?? "";
+const placeholderEvents: AttackEvent[] = [];
+
+const demoCommand =
+	"git clone https://github.com/tu-org/tu-repo.git can-i-hack-you-test && git -C can-i-hack-you-test config --local can-i-hack-you.session UUID";
+---
+
+<MainLayout
+	title="Can I Hack You? | Sesion"
+	description="Esqueleto de sesion en vivo preparado para integrar SSE y store global."
+>
+	<Section
+		eyebrow="Monitoreo en vivo"
+		title="Resumen de la actividad de tu entorno local."
+		description="Seguí en tiempo real los eventos detectados, identificá qué vector se activó y entendé en qué momento ocurrió cada ejecución."
+	>
+		<span slot="title" class="title-neutral">Resumen de la actividad de tu entorno local.</span>
+
+		<div class="session-grid" data-live-session data-api-url={apiURL}>
+			<div class="session-column">
+				<article class="panel">
+					<h3>Estado de sesión</h3>
+					<div class="status-row">
+						<p>Estado actual</p>
+						<span class="status-badge status-waiting" data-current-status>Esperando</span>
+					</div>
+					<ul class="key-value-list">
+						<li>
+							<span>ID de sesión</span>
+							<code data-session-id-label>cargando...</code>
+						</li>
+						<li>
+							<span>Último error</span>
+							<span data-error-label>Ninguno</span>
+						</li>
+					</ul>
+					<p class="panel-note">Estados posibles: esperando, conectado, ataque detectado y error.</p>
+				</article>
+
+				<article class="panel">
+					<h3>Para empezar debes estar vinculado</h3>
+					<CodeBlock label="Comando de vinculación" code={demoCommand} />
+				</article>
+			</div>
+
+			<article class="panel">
+				<div class="event-panel-header">
+					<h3>Línea de tiempo de eventos</h3>
+					<button type="button" class="event-reset-button" data-reset-events disabled>
+						Reiniciar
+					</button>
+				</div>
+				<div data-event-timeline>
+					<EventList events={placeholderEvents} />
+				</div>
+			</article>
+		</div>
+	</Section>
+
+	<script>
+		import { globalStore, type AttackEvent } from "../global-store";
+
+		const root = document.querySelector("[data-live-session]");
+
+		if (root instanceof HTMLElement) {
+			const apiURL = root.dataset.apiUrl ?? "";
+			const sessionIDLabel = root.querySelector("[data-session-id-label]");
+
+			const createSessionID = () => {
+				if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+					return crypto.randomUUID();
+				}
+
+				return `session-${Math.random().toString(36).slice(2, 10)}`;
+			};
+
+			const ensureSessionID = () => {
+				let currentSessionID = globalStore.getState().sessionID;
+
+				if (!currentSessionID) {
+					currentSessionID = createSessionID();
+					globalStore.getState().setSessionID(currentSessionID);
+				}
+
+				return currentSessionID;
+			};
+
+			const sessionID = ensureSessionID();
+
+			if (sessionIDLabel instanceof HTMLElement) {
+				sessionIDLabel.textContent = sessionID;
+			}
+
+			root.dataset.prepared = "true";
+			console.info("Sesion en vivo conectada al backend", {
+				sessionID,
+				apiURL,
+			});
+
+			const errorLabel = root.querySelector("[data-error-label]");
+			const statusBadge = root.querySelector("[data-current-status]");
+			const eventList = document.querySelector("[data-event-timeline] .event-list");
+			const resetButton = root.querySelector("[data-reset-events]");
+
+			let currentStatus = { key: "waiting", label: "Esperando" };
+			const setStatus = (status: string, label: string) => {
+				if (!(statusBadge instanceof HTMLElement)) return;
+				statusBadge.className = `status-badge status-${status}`;
+				statusBadge.textContent = label;
+				currentStatus = { key: status, label };
+			};
+
+			let hasEvents = false;
+			let isConnected = false;
+
+			const updateResetButtonState = () => {
+				if (resetButton instanceof HTMLButtonElement) {
+					resetButton.disabled = !hasEvents;
+				}
+			};
+
+			const getEventPresentation = (vector: string) => {
+				if (vector === "prepare" || vector === "preinstall" || vector === "postinstall") {
+					return {
+						title: vector,
+						tag: "npm",
+						tagClass: "event-tag-npm",
+						description: "Script de npm ejecutado automaticamente en el flujo de instalación.",
+					};
+				}
+
+				if (vector === "eslint-plugin-demo") {
+					return {
+						title: "plugin automatic execution",
+						tag: "ESLint",
+						tagClass: "event-tag-eslint",
+						description: "Ejecución automática de plugin al analizar o abrir el proyecto.",
+					};
+				}
+
+				if (vector === "vscode-task") {
+					return {
+						title: "task automatic execution",
+						tag: "VSCode",
+						tagClass: "event-tag-vscode",
+						description: "Ejecución automática de una tarea configurada en VSCode.",
+					};
+				}
+
+				return {
+					title: vector,
+					tag: "General",
+					tagClass: "event-tag-generic",
+					description: "Evento detectado por el monitoreo en vivo.",
+				};
+			};
+
+			const appendEvent = (payload: AttackEvent) => {
+				if (!(eventList instanceof HTMLElement)) return;
+
+				if (!hasEvents) {
+					const empty = eventList.querySelector(".event-item.is-empty");
+					empty?.remove();
+					hasEvents = true;
+					updateResetButtonState();
+				}
+
+				const item = document.createElement("li");
+				item.className = "event-item";
+
+				const presentation = getEventPresentation(payload.vector);
+
+				const head = document.createElement("div");
+				head.className = "event-head";
+
+				const title = document.createElement("code");
+				title.className = "event-code-title";
+				title.textContent = presentation.title;
+
+				const tag = document.createElement("span");
+				tag.className = `event-tag ${presentation.tagClass}`;
+				tag.textContent = presentation.tag;
+				head.append(title, tag);
+
+				const description = document.createElement("p");
+				description.className = "event-description";
+				description.textContent = presentation.description;
+
+				const metaRow = document.createElement("div");
+				metaRow.className = "event-meta-row";
+
+				const sessionMeta = document.createElement("p");
+				sessionMeta.className = "event-meta";
+				sessionMeta.textContent = `sesion: ${payload.sessionID}`;
+
+				const timeMeta = document.createElement("p");
+				timeMeta.className = "event-meta";
+				timeMeta.textContent = `hora: ${new Date(payload.timestamp).toLocaleString()}`;
+
+				metaRow.append(sessionMeta, timeMeta);
+				item.append(head, description, metaRow);
+				eventList.prepend(item);
+			};
+
+			const resetEvents = () => {
+				if (!(eventList instanceof HTMLElement)) return;
+
+				eventList.innerHTML = "";
+				const empty = document.createElement("li");
+				empty.className = "event-item is-empty";
+				empty.textContent = "Todavía no se recibieron eventos.";
+				eventList.append(empty);
+
+				hasEvents = false;
+				updateResetButtonState();
+				globalStore.getState().clearEvents();
+
+				if (errorLabel instanceof HTMLElement) {
+					errorLabel.textContent = "Ninguno";
+				}
+
+				if (isConnected) {
+					setStatus("connected", "Conectado");
+					return;
+				}
+
+				if (currentStatus.key === "waiting") {
+					setStatus("waiting", "Esperando");
+					return;
+				}
+
+				setStatus(currentStatus.key, currentStatus.label);
+			};
+
+			updateResetButtonState();
+
+			if (resetButton instanceof HTMLButtonElement) {
+				resetButton.addEventListener("click", resetEvents);
+			}
+
+			const es = new EventSource(`${apiURL}/events/${sessionID}`);
+
+			es.addEventListener("connected", (event) => {
+				let payload = null;
+				try {
+					payload = JSON.parse(event.data);
+				} catch (parseError) {
+					console.error("error al parsear connected:", parseError);
+				}
+
+				console.log("SSE conectado:", payload);
+				isConnected = true;
+				if (errorLabel instanceof HTMLElement) {
+					errorLabel.textContent = "Ninguno";
+				}
+				setStatus("connected", "Conectado");
+			});
+
+			es.addEventListener("attack", (event) => {
+				let payload = null;
+				try {
+					payload = JSON.parse(event.data);
+				} catch (parseError) {
+					console.error("error al parsear attack:", parseError);
+					return;
+				}
+
+				console.log("SSE ataque:", payload);
+				isConnected = true;
+				setStatus("attack", "Ataque detectado");
+				if (errorLabel instanceof HTMLElement) {
+					errorLabel.textContent = "Ninguno";
+				}
+
+				appendEvent(payload);
+			});
+
+			es.onerror = (err) => {
+				console.error("SSE error:", err);
+				isConnected = false;
+				setStatus("error", "Error");
+				if (errorLabel instanceof HTMLElement) {
+					errorLabel.textContent = "Error de conexion SSE";
+				}
+			};
+
+			window.addEventListener(
+				"beforeunload",
+				() => {
+					if (resetButton instanceof HTMLButtonElement) {
+						resetButton.removeEventListener("click", resetEvents);
+					}
+					es.close();
+				},
+				{ once: true }
+			);
+		}
+	</script>
+</MainLayout>

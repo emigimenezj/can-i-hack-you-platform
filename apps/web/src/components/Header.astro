@@ -1,0 +1,43 @@
+---
+interface NavLink {
+	href: string;
+	label: string;
+}
+
+interface Props {
+	currentPath?: string;
+}
+
+const { currentPath = "/" } = Astro.props;
+
+const navLinks: NavLink[] = [
+	{ href: "/", label: "INICIO" },
+	{ href: "/session", label: "SESION" },
+	{ href: "/attacks", label: "ATAQUES" },
+];
+
+const isActive = (href: string) =>
+	href === "/" ? currentPath === "/" : currentPath.startsWith(href);
+---
+
+<header class="site-header">
+	<div class="container header-inner">
+		<a class="brand" href="/">
+			Can I <span class="brand-accent">Hack</span> <span class="brand-accent-blue">You?</span>
+		</a>
+
+		<nav aria-label="Navegacion principal">
+			<ul class="nav-list">
+				{
+					navLinks.map((link) => (
+						<li>
+							<a class:list={["nav-link", isActive(link.href) && "is-active"]} href={link.href}>
+								{link.label}
+							</a>
+						</li>
+					))
+				}
+			</ul>
+		</nav>
+	</div>
+</header>

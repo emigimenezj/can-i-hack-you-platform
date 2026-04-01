@@ -1,0 +1,79 @@
+---
+import type { AttackEvent } from "../global-store";
+
+interface Props {
+	events: AttackEvent[];
+	emptyMessage?: string;
+}
+
+const {
+	events,
+	emptyMessage = "Todavía no se recibieron eventos.",
+} = Astro.props;
+
+const sortedEvents = [...events].sort(
+	(a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+);
+
+const getEventPresentation = (vector: string) => {
+	if (vector === "prepare" || vector === "preinstall" || vector === "postinstall") {
+		return {
+			title: vector,
+			tag: "npm",
+			tagClass: "event-tag-npm",
+			description: "Script de npm ejecutado automaticamente en el flujo de instalación.",
+		};
+	}
+
+	if (vector === "eslint-plugin-demo") {
+		return {
+			title: "plugin automatic execution",
+			tag: "ESLint",
+			tagClass: "event-tag-eslint",
+			description: "Ejecución automática de plugin al analizar o abrir el proyecto.",
+		};
+	}
+
+	if (vector === "vscode-task") {
+		return {
+			title: "task automatic execution",
+			tag: "VSCode",
+			tagClass: "event-tag-vscode",
+			description: "Ejecución automática de una tarea configurada en VSCode.",
+		};
+	}
+
+	return {
+		title: vector,
+		tag: "General",
+		tagClass: "event-tag-generic",
+		description: "Evento detectado por el monitoreo en vivo.",
+	};
+};
+---
+
+<ul class="event-list">
+	{
+		sortedEvents.length === 0 ? (
+			<li class="event-item is-empty">{emptyMessage}</li>
+		) : (
+			sortedEvents.map((event) => {
+				const presentation = getEventPresentation(event.vector);
+
+				return (
+					<li class="event-item">
+						<div class="event-head">
+							<code class="event-code-title">{presentation.title}</code>
+							<span class={`event-tag ${presentation.tagClass}`}>{presentation.tag}</span>
+						</div>
+						<p class="event-description">{presentation.description}</p>
+						<div class="event-meta-row">
+							<p class="event-meta">sesion: {event.sessionID}</p>
+							<p class="event-meta">hora: {new Date(event.timestamp).toLocaleString()}</p>
+						</div>
+					</li>
+				);
+			})
+		)
+	}
+</ul>

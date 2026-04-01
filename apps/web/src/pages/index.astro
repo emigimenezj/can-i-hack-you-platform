@@ -1,0 +1,217 @@
+---
+import CodeBlock from "../components/CodeBlock.astro";
+import Hero from "../components/Hero.astro";
+import Section from "../components/Section.astro";
+import MainLayout from "../layouts/MainLayout.astro";
+
+const demoCommand =
+	"git clone https://github.com/tu-org/tu-repo.git can-i-hack-you-test && git -C can-i-hack-you-test config --local can-i-hack-you.session UUID";
+---
+
+<MainLayout
+	title="Can I Hack You? | Inicio"
+	description="Landing de una demo educativa en vivo que muestra riesgos de ejecucion de repositorios en tiempo real."
+>
+	<Hero
+		title="Mira en tiempo real cuando codigo de terceros se ejecuta en tu entorno"
+		description="Can I Hack You? te da visibilidad inmediata sobre la ejecución de código de terceros en tu entorno. Detectá qué acción disparó el evento, qué vector estuvo involucrado y cómo reducir el riesgo antes de interactuar con repositorios desconocidos."
+		primaryHref="/session"
+		primaryLabel="Iniciar sesión en vivo"
+		secondaryHref="/attacks"
+		secondaryLabel="Explorar vectores de ataques"
+	>
+		<span slot="title">
+			Mira en tiempo real cuando <span class="title-accent">código de terceros</span> se ejecuta en
+			<span class="title-accent-blue">tu entorno</span>
+		</span>
+	</Hero>
+
+	<Section
+		id="como-funciona"
+		eyebrow="¿Cómo funciona?"
+		title="Configuralo en minutos, aprendé para siempre."
+		description="Usá tu sesión para vincular tu prueba local con la plataforma de monitoreo en vivo y ejecutá las acciones que quieras probar verificar si quedaste expuesto ante algún ataque."
+	>
+		<span slot="title">
+			<span class="title-accent">Configuralo</span>
+			<span class="title-neutral"> en minutos, </span>
+			<span class="title-accent-blue">aprendé para siempre</span>
+			<span class="title-neutral">.</span>
+		</span>
+
+		<ol class="step-list">
+			<li>
+				<h3 class="step-session-title">
+					1. Tu sesión:
+					<code data-home-session-id>cargando...</code>
+					<button type="button" class="copy-button" data-home-session-copy>
+						Copiar
+					</button>
+				</h3>
+				<p>
+					Al entrar en la plataforma se generó automáticamente un ID de sesión para tu navegador.
+					Ese identificador permite vincular tu actividad local con el panel de monitoreo en tiempo
+					real.
+				</p>
+			</li>
+			<li>
+				<h3>2. Vinculá el repositorio a la sesión</h3>
+				<p>
+					Cloná el repositorio y guardá el identificador en la configuración local de Git con el
+					nombre de <code>can-i-hack-you.session</code>. Con esto, el entorno queda asociado a tu
+					sesión.
+				</p>
+				<CodeBlock label="Comando de vinculación" code={demoCommand} />
+			</li>
+			<li>
+				<h3>3. Explorá flujos de trabajo habituales</h3>
+				<p>
+					Marcá el repositorio como "Trusted", interactuá con él como lo harías en un caso real:
+					instalando dependencias con <code>npm install</code> o reabrí el proyecto para probar la
+					ejecución automática de integraciones como ESLint.
+				</p>
+				<div class="button-row">
+					<a
+						class="button button-secondary tutorial-github-button"
+						href="https://github.com/tu-org/tu-repo"
+						target="_blank"
+						rel="noreferrer"
+					>
+						<svg
+							class="github-mark"
+							viewBox="0 0 16 16"
+							width="16"
+							height="16"
+							aria-hidden="true"
+						>
+							<path
+								fill="currentColor"
+								d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.65 7.65 0 0 1 2-.27c.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"
+							/>
+						</svg>
+						<span>Repositorio de código abierto en GitHub</span>
+					</a>
+				</div>
+			</li>
+			<li>
+				<h3>4. Seguí la actividad en vivo</h3>
+				<p>
+					Entrá en la sesión en vivo para ver los ataques detectados a medida que ocurren. Vas a
+					poder identificar qué vector se activó y cuándo ocurrió.
+				</p>
+				<div class="button-row">
+					<a class="button button-primary tutorial-cta-primary" href="/session">Ir a la sesión en vivo</a>
+				</div>
+			</li>
+			<li>
+				<h3>5. Aprendé sobre la exposición a ataques</h3>
+				<p>
+					Podés visitar la sección de ataques para informarte acerca de cómo podés quedar expuesto a
+					uno de ellos y también conocer herramientas y configuraciones para mitigarlos.
+				</p>
+				<div class="button-row">
+					<a class="button button-secondary tutorial-cta-secondary" href="/attacks">Ir a la sección de ataques</a>
+				</div>
+			</li>
+		</ol>
+	</Section>
+
+	<Section
+		id="seguridad"
+		eyebrow="Principios de Seguridad"
+		title="Creado para educación, no para uso malicioso."
+		description="Este proyecto promueve conciencia de riesgo. No busca explotar usuarios, robar datos ni ejecutar cargas peligrosas."
+	>
+		<span slot="title">
+			<span class="title-accent-blue">Creado para educación</span>
+			<span class="title-neutral">, no para uso </span>
+			<span class="title-accent">malicioso</span>
+			<span class="title-neutral">.</span>
+		</span>
+
+		<div class="note-card">
+			<p>Para que sirve esta demo:</p>
+			<ul>
+				<li>Entender superficies de ejecucion en cadena de suministro en terminos practicos.</li>
+				<li>Mostrar a equipos por que importa revisar dependencias y scripts.</li>
+				<li>Ofrecer una herramienta visual y reproducible para aprender.</li>
+			</ul>
+		</div>
+	</Section>
+</MainLayout>
+
+<script>
+	import { globalStore } from "../global-store";
+
+	const sessionIDChip = document.querySelector("[data-home-session-id]");
+	const sessionCopyButton = document.querySelector("[data-home-session-copy]");
+
+	const renderSessionID = (value: string) => {
+		if (!(sessionIDChip instanceof HTMLElement)) return;
+		sessionIDChip.textContent = value;
+	};
+
+	const createSessionID = () => {
+		if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+			return crypto.randomUUID();
+		}
+
+		return `session-${Math.random().toString(36).slice(2, 10)}`;
+	};
+
+	const ensureSessionID = () => {
+		let currentSessionID = globalStore.getState().sessionID;
+
+		if (!currentSessionID) {
+			currentSessionID = createSessionID();
+			globalStore.getState().setSessionID(currentSessionID);
+		}
+
+		renderSessionID(currentSessionID);
+	};
+
+	ensureSessionID();
+
+	let previousSessionID = globalStore.getState().sessionID;
+
+	const unsubscribe = globalStore.subscribe((state: ReturnType<typeof globalStore.getState>) => {
+		if (state.sessionID === previousSessionID) return;
+		previousSessionID = state.sessionID;
+
+		const sessionToRender = state.sessionID ?? "sin-id";
+		renderSessionID(sessionToRender);
+	});
+
+	const handleSessionCopy = async () => {
+		if (!(sessionCopyButton instanceof HTMLButtonElement)) return;
+
+		const textToCopy = sessionIDChip instanceof HTMLElement ? sessionIDChip.textContent?.trim() : "";
+		if (!textToCopy) return;
+
+		try {
+			await navigator.clipboard.writeText(textToCopy);
+			sessionCopyButton.textContent = "Copiado";
+		} catch {
+			sessionCopyButton.textContent = "Error";
+		}
+
+		setTimeout(() => {
+			sessionCopyButton.textContent = "Copiar";
+		}, 1100);
+	};
+
+	if (sessionCopyButton instanceof HTMLButtonElement) {
+		sessionCopyButton.addEventListener("click", handleSessionCopy);
+	}
+
+	window.addEventListener(
+		"beforeunload",
+		() => {
+			if (sessionCopyButton instanceof HTMLButtonElement) {
+				sessionCopyButton.removeEventListener("click", handleSessionCopy);
+			}
+			unsubscribe();
+		},
+		{ once: true }
+	);
+</script>

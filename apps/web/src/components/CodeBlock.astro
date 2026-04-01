@@ -1,0 +1,59 @@
+---
+interface Props {
+	label?: string;
+	code: string;
+	hint?: string;
+}
+
+const { label = "Comando", code, hint } = Astro.props;
+---
+
+<div class="code-block" data-code-block>
+	<div class="code-block-header">
+		<span>{label}</span>
+		<button type="button" class="copy-button" data-copy>
+			Copiar
+		</button>
+	</div>
+
+	<pre><code>{code}</code></pre>
+
+	{hint && <p class="code-hint">{hint}</p>}
+</div>
+
+<script>
+	const setupCopyButtons = () => {
+		document.querySelectorAll("[data-code-block]").forEach((block) => {
+			if (!(block instanceof HTMLElement) || block.dataset.copyReady === "true") {
+				return;
+			}
+
+			block.dataset.copyReady = "true";
+			const button = block.querySelector("[data-copy]");
+			const code = block.querySelector("code");
+
+			if (!(button instanceof HTMLButtonElement) || !(code instanceof HTMLElement)) {
+				return;
+			}
+
+			button.addEventListener("click", async () => {
+				try {
+					await navigator.clipboard.writeText(code.innerText);
+					button.textContent = "Copiado";
+				} catch {
+					button.textContent = "Error al copiar";
+				}
+
+				setTimeout(() => {
+					button.textContent = "Copiar";
+				}, 1000);
+			});
+		});
+	};
+
+	if (document.readyState === "loading") {
+		document.addEventListener("DOMContentLoaded", setupCopyButtons, { once: true });
+	} else {
+		setupCopyButtons();
+	}
+</script>
