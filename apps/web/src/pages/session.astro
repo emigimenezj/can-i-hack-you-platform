@@ -7,9 +7,6 @@ import type { AttackEvent } from "../global-store";
 
 const apiURL = import.meta.env.PUBLIC_API_URL ?? "";
 const placeholderEvents: AttackEvent[] = [];
-
-const demoCommand =
-	"git clone https://github.com/tu-org/tu-repo.git can-i-hack-you-test && git -C can-i-hack-you-test config --local can-i-hack-you.session UUID";
 ---
 
 <MainLayout
@@ -46,7 +43,7 @@ const demoCommand =
 
 				<article class="panel">
 					<h3>Para empezar debes estar vinculado</h3>
-					<CodeBlock label="Comando de vinculación" code={demoCommand} />
+					<CodeBlock label="Comando de vinculación" code="" bindSessionID />
 				</article>
 			</div>
 
@@ -93,10 +90,33 @@ const demoCommand =
 			};
 
 			const sessionID = ensureSessionID();
+			const buildBindingCommand = (currentSessionID: string) =>
+				`git clone https://github.com/emigimenezj/can-i-hack-you-demo.git can-i-hack-you-test && git -C can-i-hack-you-test config --local can-i-hack-you.session ${currentSessionID}`;
+
+			const renderBindingCommands = (currentSessionID: string) => {
+				document
+					.querySelectorAll('[data-session-binding-command="true"]')
+					.forEach((block) => {
+						if (!(block instanceof HTMLElement)) return;
+
+						const codeNode = block.querySelector("code");
+						if (codeNode instanceof HTMLElement) {
+							codeNode.textContent = buildBindingCommand(currentSessionID);
+						}
+
+						const copyButton = block.querySelector("[data-copy]");
+						if (copyButton instanceof HTMLButtonElement) {
+							copyButton.hidden = false;
+							copyButton.disabled = false;
+						}
+					});
+			};
 
 			if (sessionIDLabel instanceof HTMLElement) {
 				sessionIDLabel.textContent = sessionID;
 			}
+
+			renderBindingCommands(sessionID);
 
 			root.dataset.prepared = "true";
 			console.info("Sesion en vivo conectada al backend", {

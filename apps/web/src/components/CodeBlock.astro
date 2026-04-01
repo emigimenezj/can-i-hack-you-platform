@@ -3,20 +3,27 @@ interface Props {
 	label?: string;
 	code: string;
 	hint?: string;
+	bindSessionID?: boolean;
 }
 
-const { label = "Comando", code, hint } = Astro.props;
+const {
+	label = "Comando",
+	code,
+	hint,
+	bindSessionID = false,
+} = Astro.props;
+const initialCode = bindSessionID ? "Cargando comando de vinculación..." : code;
 ---
 
-<div class="code-block" data-code-block>
+<div class="code-block" data-code-block data-session-binding-command={bindSessionID ? "true" : undefined}>
 	<div class="code-block-header">
 		<span>{label}</span>
-		<button type="button" class="copy-button" data-copy>
+		<button type="button" class="copy-button" data-copy hidden={bindSessionID} disabled={bindSessionID}>
 			Copiar
 		</button>
 	</div>
 
-	<pre><code>{code}</code></pre>
+	<pre><code>{initialCode}</code></pre>
 
 	{hint && <p class="code-hint">{hint}</p>}
 </div>

@@ -3,9 +3,6 @@ import CodeBlock from "../components/CodeBlock.astro";
 import Hero from "../components/Hero.astro";
 import Section from "../components/Section.astro";
 import MainLayout from "../layouts/MainLayout.astro";
-
-const demoCommand =
-	"git clone https://github.com/tu-org/tu-repo.git can-i-hack-you-test && git -C can-i-hack-you-test config --local can-i-hack-you.session UUID";
 ---
 
 <MainLayout
@@ -61,7 +58,7 @@ const demoCommand =
 					nombre de <code>can-i-hack-you.session</code>. Con esto, el entorno queda asociado a tu
 					sesión.
 				</p>
-				<CodeBlock label="Comando de vinculación" code={demoCommand} />
+				<CodeBlock label="Comando de vinculación" code="" bindSessionID />
 			</li>
 			<li>
 				<h3>3. Explorá flujos de trabajo habituales</h3>
@@ -73,7 +70,7 @@ const demoCommand =
 				<div class="button-row">
 					<a
 						class="button button-secondary tutorial-github-button"
-						href="https://github.com/tu-org/tu-repo"
+						href="https://github.com/emigimenezj/can-i-hack-you-demo"
 						target="_blank"
 						rel="noreferrer"
 					>
@@ -151,6 +148,28 @@ const demoCommand =
 		sessionIDChip.textContent = value;
 	};
 
+	const buildBindingCommand = (sessionID: string) =>
+		`git clone https://github.com/emigimenezj/can-i-hack-you-demo.git can-i-hack-you-test && git -C can-i-hack-you-test config --local can-i-hack-you.session ${sessionID}`;
+
+	const renderBindingCommands = (sessionID: string) => {
+		document
+			.querySelectorAll('[data-session-binding-command="true"]')
+			.forEach((block) => {
+				if (!(block instanceof HTMLElement)) return;
+
+				const codeNode = block.querySelector("code");
+				if (codeNode instanceof HTMLElement) {
+					codeNode.textContent = buildBindingCommand(sessionID);
+				}
+
+				const copyButton = block.querySelector("[data-copy]");
+				if (copyButton instanceof HTMLButtonElement) {
+					copyButton.hidden = false;
+					copyButton.disabled = false;
+				}
+			});
+	};
+
 	const createSessionID = () => {
 		if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
 			return crypto.randomUUID();
@@ -168,6 +187,7 @@ const demoCommand =
 		}
 
 		renderSessionID(currentSessionID);
+		renderBindingCommands(currentSessionID);
 	};
 
 	ensureSessionID();
@@ -180,6 +200,9 @@ const demoCommand =
 
 		const sessionToRender = state.sessionID ?? "sin-id";
 		renderSessionID(sessionToRender);
+		if (state.sessionID) {
+			renderBindingCommands(state.sessionID);
+		}
 	});
 
 	const handleSessionCopy = async () => {
